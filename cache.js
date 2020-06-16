@@ -11,8 +11,8 @@ var cache = {
 
   maxLength: 1000,
 
-  onIpChange: function (domain, ips, existed) { },
-  onDomainDelete: function (domain) { },
+  onIpChange: function (domain, ips, existed) { console.log('onIpChange: ' + domain + "," + ips + ',' + existed);},
+  onDomainDelete: function (domain) { console.log('onDomainDelete: ' + domain);},
 
   has: function (domain) {
     return domain in cache._items;

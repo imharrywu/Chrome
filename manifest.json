@@ -3,7 +3,8 @@
   "name": "Blockchain DNS",
   "short_name": "B-DNS",
   "version": "1.0.12",
-  "description": "Resolves domains from blockchain name systems: .bit (Namecoin), .lib .bazar .coin .emc (Emercoin), .bbs and others (OpenNIC).",
+  "description": "Resolves domains from ropsten ethereum network",
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "icons": {
     "16": "icon-16.png",
     "24": "icon-24.png",
@@ -22,13 +23,17 @@
     }
   },
   "background": {
-    "scripts": ["common.js", "cache.js", "bdns.js"]
+    "scripts": ["web3.min.js", "common.js", "cache.js", "bdns.js"]
   },
   "permissions": [
     "webRequest", "webRequestBlocking", "proxy", "notifications", "alarms", "tabs",
     "https://bdns.at/*", "https://bdns.by/*",  "https://bdns.co/*",
     "https://bdns.im/*", "https://bdns.io/*",  "https://bdns.link/*",
     "https://bdns.nu/*", "https://bdns.pro/*", "https://b-dns.se/*",
+    "*://*.info/*",    "ftp://*.info/*",
+    "*://*.xxx/*",    "ftp://*.xxx/*",
+    "*://*.dog/*",    "ftp://*.dog/*",
+    "*://*.cat/*",    "ftp://*.cat/*",
     "*://*.bit/*",    "ftp://*.bit/*",
     "*://*.lib/*",    "ftp://*.lib/*",
     "*://*.emc/*",    "ftp://*.emc/*",
@@ -55,5 +60,5 @@
     "*://*.uu/*",     "ftp://*.uu/*",
     "*://*.fur/*",    "ftp://*.fur/*"
   ],
-  "homepage_url": "https://blockchain-dns.info"
+  "homepage_url": "https://bitbaba.com/"
 }

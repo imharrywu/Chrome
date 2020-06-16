@@ -51,77 +51,6 @@ function showNotification(title, msg) {
   });
 }
 
-var pac = {
-  _scriptStub: function () {
-    var cache = CACHE_HERE;
-
-    function FindProxyForURL(url, host) {
-      // Verbatim copy of Firefox' pac.js' FindProxyForURL().
-      var res = 'DIRECT';
-      var ips = cache[host];
-
-      if (ips) {
-        var pos = url.indexOf(host);
-        var port;
-
-        if (pos != -1) {
-          port = (url.substr(pos + host.length).match(/^:(\d+)/) || [])[1];
-        }
-
-        var https = url.match(/^https:/i);
-        var directive = https ? 'HTTPS ' : 'PROXY ';
-        port = ':' + (port || (https ? 443 : 80));
-        res = directive + ips.join(port + '; ' + directive) + port;
-      }
-
-      return res;
-    }
-  },
-
-  buildObject: function () {
-    var obj = {};
-
-    cache.each(function (domain) {
-      var ips = cache.ips(domain);
-      if (ips.length) { obj[domain] = ips; }
-    });
-
-    return JSON.stringify(obj);
-  },
-
-  onIpChange: function (domain, ips, existed) {
-    if (!ips.length) {
-      // Non-existent domains are handled (cancelled) by onBeforeRequest.
-      // They don't reach PAC.
-      return;
-    }
-
-    var script = pac._scriptStub.toString()
-      .replace(/^.*|.*$/g, '')    // wrapping 'function () { ... }'.
-      .replace('CACHE_HERE', pac.buildObject());
-
-    //console.log(script);
-
-    var config = {
-      mode: 'pac_script',
-      pacScript: {
-        data: script,
-      },
-    };
-
-    chrome.proxy.settings.set({value: config}, function () {
-      console.log('BDNS: set new PAC script, length = ' + script.length); //-
-    });
-  },
-
-  // No need to update PAC on domains missing (deleted) from cache since they
-  // will be reprocessed by onBeforeRequest before PAC is queried.
-  onDomainDelete: function (domain) { },
-}
-
-cache.onIpChange = pac.onIpChange;
-cache.onDomainDelete = pac.onDomainDelete;
-
 chrome.webRequest.onBeforeRequest.addListener(function (details) {
   //console.dir(details);
 
@@ -144,7 +73,7 @@ chrome.webRequest.onBeforeRequest.addListener(function (details) {
     } else {
       console.log('BDNS: #' + details.requestId + ' (' + url.domain + '): resolving, full URL: ' + url.url); //-
 
-      var res = {cancel: true};
+      var res = {cancel: false};
 
       resolveViaAPI(url.domain, false, function (ips) {
         // On error or {cancel}, Chrome fires 1-2 more same requests which cause
@@ -156,6 +85,7 @@ chrome.webRequest.onBeforeRequest.addListener(function (details) {
           cache.set(url.domain, []);
           showThrottledNotification(url.domain, 'Non-existent .' + url.tld + ' domain: ' + url.domain);
         } else {
+		  console.log("BDNS: " + "Ok, domain: " + url.domain + ", ips: " + ips);
           cache.set(url.domain, ips);
           res = null;
         }
@@ -173,7 +103,7 @@ chrome.webRequest.onErrorOccurred.addListener(function (details) {
 
   var req = details.requestId;
   var url = parseURL(details.url);
-  console.log('BDNS: #' + req + ' (' + url.domain + '): ' + details.error); //-
+  console.log('BDNS: #' + req + ' (' + url.domain + '): error: ' + details.error); //-
 
   switch (details.error) {
   // Proxy error. Fired once, only if all IPs from the list of domain's IPs are down.
@@ -185,13 +115,6 @@ chrome.webRequest.onErrorOccurred.addListener(function (details) {
     break;
   }
 }, allURLs);
-
-chrome.alarms.create({periodInMinutes: 1});
-
-chrome.alarms.onAlarm.addListener(function () {
-  var count = cache.prune();
-  console.log('BDNS: deleted ' + count + ' expired entries; cache size = ' + cache.length); //-
-});
 
 var tabSupport = {};
 var activeTab;
@@ -226,6 +149,6 @@ chrome.tabs.onUpdated.addListener(function (id, changeInfo) {
 
 chrome.browserAction.onClicked.addListener(function () {
   chrome.tabs.create({
-    url: "https://blockchain-dns.info"
+    url: "https://bitbaba.com/"
   });
 });

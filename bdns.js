@@ -52,6 +52,9 @@ function showNotification(title, msg) {
 }
 
 var pac = {
+  /*Harry: Comment, following is a stub code, which will executed in PAC context.
+    only used by the javascript Function.toString() to get a stub for PAC script. 
+  */
   _scriptStub: function () {
     var cache = CACHE_HERE;
 
@@ -226,6 +229,6 @@ chrome.tabs.onUpdated.addListener(function (id, changeInfo) {
 
 chrome.browserAction.onClicked.addListener(function () {
   chrome.tabs.create({
-    url: "https://blockchain-dns.info"
+    url: "https://bitbaba.com/"
   });
 });

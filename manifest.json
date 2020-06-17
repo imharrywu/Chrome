@@ -2,8 +2,9 @@
   "manifest_version": 2,
   "name": "Blockchain DNS",
   "short_name": "B-DNS",
-  "version": "1.0.12",
-  "description": "Resolves domains from blockchain name systems: .bit (Namecoin), .lib .bazar .coin .emc (Emercoin), .bbs and others (OpenNIC).",
+  "version": "2.0.1",
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "description": "Resolves domains from blockchain name systems, now powered by ropsten network.",
   "icons": {
     "16": "icon-16.png",
     "24": "icon-24.png",
@@ -22,7 +23,7 @@
     }
   },
   "background": {
-    "scripts": ["common.js", "cache.js", "bdns.js"]
+    "scripts": ["web3.min.js", "common.js", "cache.js", "bdns.js"]
   },
   "permissions": [
     "webRequest", "webRequestBlocking", "proxy", "notifications", "alarms", "tabs",
@@ -53,7 +54,10 @@
     "*://*.te/*",     "ftp://*.te/*",
     "*://*.ti/*",     "ftp://*.ti/*",
     "*://*.uu/*",     "ftp://*.uu/*",
-    "*://*.fur/*",    "ftp://*.fur/*"
+    "*://*.fur/*",    "ftp://*.fur/*",
+	"https://bitbaba.com/eth/*",
+    "*://*.company/*",
+	"<all_urls>"
   ],
-  "homepage_url": "https://blockchain-dns.info"
+  "homepage_url": "https://bitbaba.com/"
 }

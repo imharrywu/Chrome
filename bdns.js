@@ -126,13 +126,10 @@ cache.onIpChange = pac.onIpChange;
 cache.onDomainDelete = pac.onDomainDelete;
 
 chrome.webRequest.onBeforeRequest.addListener(function (details) {
-  //console.dir(details);
-
+  console.dir(details);
   var url = parseURL(details.url);
-
   if (url) {
     var ips = cache.ips(url.domain);
-
     if (ips) {
       console.log('BDNS: #' + details.requestId + ' (' + url.domain + '): already resolved to ' + ips + '; cache size = ' + cache.length); //-
 
@@ -146,9 +143,7 @@ chrome.webRequest.onBeforeRequest.addListener(function (details) {
       }
     } else {
       console.log('BDNS: #' + details.requestId + ' (' + url.domain + '): resolving, full URL: ' + url.url); //-
-
       var res = {cancel: true};
-
       resolveViaAPI(url.domain, false, function (ips) {
         // On error or {cancel}, Chrome fires 1-2 more same requests which cause
         // repeated notifications.
@@ -163,9 +158,7 @@ chrome.webRequest.onBeforeRequest.addListener(function (details) {
           res = null;
         }
       });
-
       console.log('BDNS: #' + details.requestId + ' (' + url.domain + '): resolution finished, returning ' + res); //-
-
       return res;
     }
   }

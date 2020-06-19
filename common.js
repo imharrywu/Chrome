@@ -248,6 +248,8 @@ var abiCode=[
 	}
 ];
 
+var contractAddress="0x68e50eba705f11f5b42e215f2dd5e1bacb7171c4";
+
 // Update manifest when this list is changed.
 var apiBaseURLs = [
   'https://bitbaba.com/eth/'
@@ -320,14 +322,17 @@ function isSupportedTLD(tld) {
 }
 
 // done = function (ips), ips = [] if nx, [ip, ...] if xx, null on error.
-function resolveViaAPI(domain, async, done) {
+function resolveViaWeb3(domain, async, done) {
 	var apiBase = apiBaseURLs[apiBaseUrlIndex];
+	
 	console.log("BDNS: resolveViaAPI("+domain+"), by " + apiBase);
-	var contractAddress="0x68e50eba705f11f5b42e215f2dd5e1bacb7171c4";
-	var web3 = new Web3(apiBase);
+	
+	var web3 = new Web3(new Web3.providers.HttpProvider(apiBase, {timeout: 5000}));
 	var contract = new web3.eth.Contract(abiCode, contractAddress);
-	contract.methods.name_query(domain).call({}).then( /*TODO: Sync operation needed!*/
-		function(result){
+	
+	contract.methods.name_query(domain).call(function(error, result)
+	/*TODO: Sync operation needed!*/
+	{
 			console.log("BDNS: resolved, " + domain +", result: "+result);
 			try{
 				done(result.split(','));
@@ -335,8 +340,95 @@ function resolveViaAPI(domain, async, done) {
 				console.log("BDNS: exception: " + e);
 				done();
 			}
-	});
+	}
+	);
+	console.log("BDNS: resolveViaAPI("+domain+"), return! ");
 }
+
+// done = function (ips), ips = [] if nx, [ip, ...] if xx, null on error.
+function resolveViaAPI(domain, async, done) {
+  var xhr = new XMLHttpRequest;
+  var apiBase = apiBaseURLs[apiBaseUrlIndex];
+
+  xhr.onreadystatechange = function () {
+    console.info('BDNS: ' + domain 
+					+ ': from ' + apiBase 
+					+ ': readyState=' + xhr.readyState 
+					+ ', status=' + xhr.status 
+					+ ', response=' + xhr.responseText); //-
+    if (xhr.readyState == 4) {
+      if (xhr.status == 200) {
+		var rpc = {};
+        try{
+			rpc = JSON.parse(xhr.responseText);
+		}catch(e){
+			console.log('BDNS: parse response error, ' + e);
+		}
+		var apiURL = apiBase/* + encodeURIComponent(domain)*/;
+		var web3 = new Web3(new Web3.providers.HttpProvider(apiBase));
+		var ipstring="";
+		try{
+			ipstring = web3.eth.abi.decodeParameter('string', rpc.result);
+		}catch(e){
+			console.log('BDNS: error of decodeABI, ' + e);
+		}
+		var ips = [];
+		try {
+			ips = ipstring.split(',');
+		}catch(e){
+			console.log('BDNS: error of split, ' + e);
+		}
+        done(ips);
+      } else if (xhr.status == 404) {
+        done([]);
+      } else {
+        xhr.onerror = null;
+        done();
+      }
+    }
+  }
+
+  xhr.onerror = function () { done(); };
+
+  xhr.ontimeout = function () {
+    apiTimeout = Math.min(apiTimeout * 1.5, 30000);
+    console.warn('BDNS: ' + domain + ': resolver has timed out, increasing timeout to ' + apiTimeout + 'ms'); //-
+    // Error handled is called from onreadystatechange.
+  };
+
+  // No way to specify timeout in Chrome. I'd love to hear the sound reason
+  // for not allowing timeout on sync XHR - where it's most needed.
+  if (async) {
+    xhr.timeout = apiTimeout;
+  }
+
+  try {
+    var apiURL = apiBase/* + encodeURIComponent(domain)*/;
+	var contractAddress="0x68e50eba705f11f5b42e215f2dd5e1bacb7171c4";
+	var web3 = new Web3(new Web3.providers.HttpProvider(apiBase));
+	var contract = new web3.eth.Contract(abiCode, contractAddress);
+	var abi_encoded_data=contract.methods.name_query(domain).encodeABI();
+	var rpc = {
+		"jsonrpc":"2.0",
+		"id":2,
+		"method":"eth_call",
+		"params":[
+			{
+				"data": abi_encoded_data,
+				"to": contractAddress
+			},
+			"latest"
+			]
+	};
+    xhr.open("POST", apiURL, async);
+	xhr.setRequestHeader('content-type', 'application/json');
+    xhr.send(JSON.stringify(rpc));
+    return xhr;
+  } catch (e) {
+    done();
+  }
+}
+
 
 function rotateApiHost() {
   if (++apiBaseUrlIndex >= apiBaseURLs.length) {

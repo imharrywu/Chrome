@@ -7,7 +7,7 @@ var cache = {
   _length: 0,
 
   // In seconds.
-  defaultCacheTTL: 600,
+  defaultCacheTTL: 30,
 
   maxLength: 1000,
 

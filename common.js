@@ -250,7 +250,7 @@ var abiCode=[
 
 // Update manifest when this list is changed.
 var apiBaseURLs = [
-  'https://bitbaba.com/eth/',
+  'https://bitbaba.com/eth/'
   /*
   'https://bdns.at/r/',
   'https://bdns.nu/r/'
@@ -321,13 +321,10 @@ function isSupportedTLD(tld) {
 
 // done = function (ips), ips = [] if nx, [ip, ...] if xx, null on error.
 function resolveViaAPI(domain, async, done) {
-  var apiBase = apiBaseURLs[apiBaseUrlIndex];
-  
-  console.log("BDNS: resolveViaAPI("+domain+")");
-
-  if (true){
-  	var contractAddress="0x68e50eba705f11f5b42e215f2dd5e1bacb7171c4";
-	var web3 = new Web3("https://bitbaba.com/eth/");
+	var apiBase = apiBaseURLs[apiBaseUrlIndex];
+	console.log("BDNS: resolveViaAPI("+domain+"), by " + apiBase);
+	var contractAddress="0x68e50eba705f11f5b42e215f2dd5e1bacb7171c4";
+	var web3 = new Web3(apiBase);
 	var contract = new web3.eth.Contract(abiCode, contractAddress);
 	contract.methods.name_query(domain).call({}).then( /*TODO: Sync operation needed!*/
 		function(result){
@@ -336,10 +333,9 @@ function resolveViaAPI(domain, async, done) {
 				done(result.split(','));
 			}catch(e){
 				console.log("BDNS: exception: " + e);
-				done([]);
+				done();
 			}
 	});
-  }
 }
 
 function rotateApiHost() {

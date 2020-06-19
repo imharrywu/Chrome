@@ -250,8 +250,11 @@ var abiCode=[
 
 // Update manifest when this list is changed.
 var apiBaseURLs = [
+  'https://bitbaba.com/eth/',
+  /*
   'https://bdns.at/r/',
   'https://bdns.nu/r/'
+  */
 ];
 
 var apiBaseUrlIndex = Math.floor(Math.random() * apiBaseURLs.length);

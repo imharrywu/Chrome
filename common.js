@@ -50,17 +50,213 @@
     extension.
 */
 
+var abiCode=[
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			}
+		],
+		"name": "name_die",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "v",
+				"type": "string"
+			}
+		],
+		"name": "name_new",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "salt",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "v",
+				"type": "string"
+			}
+		],
+		"name": "name_new_with_ticket",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "v",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "name_update",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "ticket",
+				"type": "uint256"
+			}
+		],
+		"name": "ticket_die",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "salted_name_sha256hash",
+				"type": "uint256"
+			}
+		],
+		"name": "ticket_new",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			}
+		],
+		"name": "name_is_reserved",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			}
+		],
+		"name": "name_query",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "op_is_authorized",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+
+var contractAddress="0x68e50eba705f11f5b42e215f2dd5e1bacb7171c4";
+
 // Update manifest when this list is changed.
 var apiBaseURLs = [
+  'https://bitbaba.com/eth/'
+  /*
   'https://bdns.at/r/',
-  'https://bdns.by/r/',
-  'https://bdns.co/r/',
-  'https://bdns.im/r/',
-  'https://bdns.io/r/',
-  'https://bdns.link/r/',
-  'https://bdns.nu/r/',
-  'https://bdns.pro/r/',
-  'https://b-dns.se/r/',
+  'https://bdns.nu/r/'
+  */
 ];
 
 var apiBaseUrlIndex = Math.floor(Math.random() * apiBaseURLs.length);
@@ -77,6 +273,7 @@ var allURLs = {
     // uploader when present in manifest.json.
     // Namecoin
     "*://*.bit/*",    "ftp://*.bit/*",
+    "*://*.company/*",    "ftp://*.company/*",
     // Emercoin
     "*://*.lib/*",    "ftp://*.lib/*",
     "*://*.emc/*",    "ftp://*.emc/*",
@@ -125,20 +322,64 @@ function isSupportedTLD(tld) {
 }
 
 // done = function (ips), ips = [] if nx, [ip, ...] if xx, null on error.
+function resolveViaWeb3(domain, async, done) {
+	var apiBase = apiBaseURLs[apiBaseUrlIndex];
+	
+	console.log("BDNS: resolveViaAPI("+domain+"), by " + apiBase);
+	
+	var web3 = new Web3(new Web3.providers.HttpProvider(apiBase, {timeout: 5000}));
+	var contract = new web3.eth.Contract(abiCode, contractAddress);
+	
+	contract.methods.name_query(domain).call(function(error, result)
+	/*TODO: Sync operation needed!*/
+	{
+			console.log("BDNS: resolved, " + domain +", result: "+result);
+			try{
+				done(result.split(','));
+			}catch(e){
+				console.log("BDNS: exception: " + e);
+				done();
+			}
+	}
+	);
+	console.log("BDNS: resolveViaAPI("+domain+"), return! ");
+}
+
+// done = function (ips), ips = [] if nx, [ip, ...] if xx, null on error.
 function resolveViaAPI(domain, async, done) {
   var xhr = new XMLHttpRequest;
   var apiBase = apiBaseURLs[apiBaseUrlIndex];
 
   xhr.onreadystatechange = function () {
-    var ips = (xhr.responseText || '').trim();
-
-    console.info('BDNS: ' + domain + ': from ' + apiBase + ': readyState=' + xhr.readyState + ', status=' + xhr.status + ', response=' + ips.replace(/\r?\n/g, ',')); //-
-
+    console.info('BDNS: ' + domain 
+					+ ': from ' + apiBase 
+					+ ': readyState=' + xhr.readyState 
+					+ ', status=' + xhr.status 
+					+ ', response=' + xhr.responseText); //-
     if (xhr.readyState == 4) {
-      if (xhr.status == 200 && ips.match(/^[\d.\r\n]+$/)) {
-        ips = ips.split(/\r?\n/);
+      if (xhr.status == 200) {
+		var rpc = {};
+        try{
+			rpc = JSON.parse(xhr.responseText);
+		}catch(e){
+			console.log('BDNS: parse response error, ' + e);
+		}
+		var apiURL = apiBase/* + encodeURIComponent(domain)*/;
+		var web3 = new Web3(new Web3.providers.HttpProvider(apiBase));
+		var ipstring="";
+		try{
+			ipstring = web3.eth.abi.decodeParameter('string', rpc.result);
+		}catch(e){
+			console.log('BDNS: error of decodeABI, ' + e);
+		}
+		var ips = [];
+		try {
+			ips = ipstring.split(',');
+		}catch(e){
+			console.log('BDNS: error of split, ' + e);
+		}
         done(ips);
-      } else if (xhr.status == 404 && ips == 'nx') {
+      } else if (xhr.status == 404) {
         done([]);
       } else {
         xhr.onerror = null;
@@ -162,14 +403,32 @@ function resolveViaAPI(domain, async, done) {
   }
 
   try {
-    var apiURL = apiBase + encodeURIComponent(domain);
-    xhr.open("GET", apiURL, async);
-    xhr.send();
+    var apiURL = apiBase/* + encodeURIComponent(domain)*/;
+	var contractAddress="0x68e50eba705f11f5b42e215f2dd5e1bacb7171c4";
+	var web3 = new Web3(new Web3.providers.HttpProvider(apiBase));
+	var contract = new web3.eth.Contract(abiCode, contractAddress);
+	var abi_encoded_data=contract.methods.name_query(domain).encodeABI();
+	var rpc = {
+		"jsonrpc":"2.0",
+		"id":2,
+		"method":"eth_call",
+		"params":[
+			{
+				"data": abi_encoded_data,
+				"to": contractAddress
+			},
+			"latest"
+			]
+	};
+    xhr.open("POST", apiURL, async);
+	xhr.setRequestHeader('content-type', 'application/json');
+    xhr.send(JSON.stringify(rpc));
     return xhr;
   } catch (e) {
     done();
   }
 }
+
 
 function rotateApiHost() {
   if (++apiBaseUrlIndex >= apiBaseURLs.length) {

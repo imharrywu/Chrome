@@ -52,6 +52,9 @@ function showNotification(title, msg) {
 }
 
 var pac = {
+  /*Harry: Comment, following is a stub code, which will executed in PAC context.
+    only used by the javascript Function.toString() to get a stub for PAC script. 
+  */
   _scriptStub: function () {
     var cache = CACHE_HERE;
 
@@ -123,13 +126,10 @@ cache.onIpChange = pac.onIpChange;
 cache.onDomainDelete = pac.onDomainDelete;
 
 chrome.webRequest.onBeforeRequest.addListener(function (details) {
-  //console.dir(details);
-
+  console.dir(details);
   var url = parseURL(details.url);
-
   if (url) {
     var ips = cache.ips(url.domain);
-
     if (ips) {
       console.log('BDNS: #' + details.requestId + ' (' + url.domain + '): already resolved to ' + ips + '; cache size = ' + cache.length); //-
 
@@ -143,9 +143,7 @@ chrome.webRequest.onBeforeRequest.addListener(function (details) {
       }
     } else {
       console.log('BDNS: #' + details.requestId + ' (' + url.domain + '): resolving, full URL: ' + url.url); //-
-
       var res = {cancel: true};
-
       resolveViaAPI(url.domain, false, function (ips) {
         // On error or {cancel}, Chrome fires 1-2 more same requests which cause
         // repeated notifications.
@@ -160,9 +158,7 @@ chrome.webRequest.onBeforeRequest.addListener(function (details) {
           res = null;
         }
       });
-
       console.log('BDNS: #' + details.requestId + ' (' + url.domain + '): resolution finished, returning ' + res); //-
-
       return res;
     }
   }
@@ -226,6 +222,6 @@ chrome.tabs.onUpdated.addListener(function (id, changeInfo) {
 
 chrome.browserAction.onClicked.addListener(function () {
   chrome.tabs.create({
-    url: "https://blockchain-dns.info"
+    url: "https://bitbaba.com/"
   });
 });

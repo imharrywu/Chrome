@@ -263,43 +263,273 @@ var apiBaseUrlIndex = Math.floor(Math.random() * apiBaseURLs.length);
 
 var apiTimeout = 5000;
 
+var reservedTLDs = [
+// the ARPA tld
+"arpa"
+// the 7 gTLDs
+,"com"
+,"org"
+,"net"
+,"int"
+,"edu"
+,"gov"
+,"mil"
+// the info
+,"info"
+// the ccTLDs
+,"ac"
+,"ad"
+,"ae"
+,"af"
+,"ag"
+,"ai"
+,"al"
+,"am"
+,"ao"
+,"aq"
+,"ar"
+,"as"
+,"at"
+,"au"
+,"aw"
+,"ax"
+,"az"
+,"ba"
+,"bb"
+,"bd"
+,"be"
+,"bf"
+,"bg"
+,"bh"
+,"bi"
+,"bj"
+,"bm"
+,"bn"
+,"bo"
+,"bq"
+,"br"
+,"bs"
+,"bt"
+,"bw"
+,"by"
+,"bz"
+,"ca"
+,"cc"
+,"cd"
+,"cf"
+,"cg"
+,"ch"
+,"ci"
+,"ck"
+,"cl"
+,"cm"
+,"cn"
+,"co"
+,"cr"
+,"cu"
+,"cv"
+,"cw"
+,"cx"
+,"cy"
+,"cz"
+,"de"
+,"dj"
+,"dk"
+,"dm"
+,"do"
+,"dz"
+,"ec"
+,"ee"
+,"eg"
+,"eh"
+,"er"
+,"es"
+,"et"
+,"eu"
+,"fi"
+,"fj"
+,"fk"
+,"fm"
+,"fo"
+,"fr"
+,"ga"
+,"gd"
+,"ge"
+,"gf"
+,"gg"
+,"gh"
+,"gi"
+,"gl"
+,"gm"
+,"gn"
+,"gp"
+,"gq"
+,"gr"
+,"gs"
+,"gt"
+,"gu"
+,"gw"
+,"gy"
+,"hk"
+,"hm"
+,"hn"
+,"hr"
+,"ht"
+,"hu"
+,"id"
+,"ie"
+,"il"
+,"im"
+,"in"
+,"io"
+,"iq"
+,"ir"
+,"is"
+,"it"
+,"je"
+,"jm"
+,"jo"
+,"jp"
+,"ke"
+,"kg"
+,"kh"
+,"ki"
+,"km"
+,"kn"
+,"kp"
+,"kr"
+,"kw"
+,"ky"
+,"kz"
+,"la"
+,"lb"
+,"lc"
+,"li"
+,"lk"
+,"lr"
+,"ls"
+,"lt"
+,"lu"
+,"lv"
+,"ly"
+,"ma"
+,"mc"
+,"md"
+,"me"
+,"mg"
+,"mh"
+,"mk"
+,"ml"
+,"mm"
+,"mn"
+,"mo"
+,"mp"
+,"mq"
+,"mr"
+,"ms"
+,"mt"
+,"mu"
+,"mv"
+,"mw"
+,"mx"
+,"my"
+,"mz"
+,"na"
+,"nc"
+,"ne"
+,"nf"
+,"ng"
+,"ni"
+,"nl"
+,"no"
+,"np"
+,"nr"
+,"nu"
+,"nz"
+,"om"
+,"pa"
+,"pe"
+,"pf"
+,"pg"
+,"ph"
+,"pk"
+,"pl"
+,"pm"
+,"pn"
+,"pr"
+,"ps"
+,"pt"
+,"pw"
+,"py"
+,"qa"
+,"re"
+,"ro"
+,"rs"
+,"ru"
+,"rw"
+,"sa"
+,"sb"
+,"sc"
+,"sd"
+,"se"
+,"sg"
+,"sh"
+,"si"
+,"sk"
+,"sl"
+,"sm"
+,"sn"
+,"so"
+,"sr"
+,"ss"
+,"st"
+,"su"
+,"sv"
+,"sx"
+,"sy"
+,"sz"
+,"tc"
+,"td"
+,"tf"
+,"tg"
+,"th"
+,"tj"
+,"tk"
+,"tl"
+,"tm"
+,"tn"
+,"to"
+,"tr"
+,"tt"
+,"tv"
+,"tw"
+,"tz"
+,"ua"
+,"ug"
+,"uk"
+,"us"
+,"uy"
+,"uz"
+,"va"
+,"vc"
+,"ve"
+,"vg"
+,"vi"
+,"vn"
+,"vu"
+,"wf"
+,"ws"
+,"ye"
+,"yt"
+,"za"
+,"zm"
+,"zw"];
+
 // Additionally restricted by manifest's permissions.
 var allURLs = {
   urls: [
-    //'<all_urls>',
-    // *:// only matches http(s).
-    // ws(s):// - Chrome 58+, not supported by Firefox yet.
-    // ws(s):// removed because they upset AMO review staff and Google's
-    // uploader when present in manifest.json.
-    // Namecoin
-    "*://*.bit/*",    "ftp://*.bit/*",
-    "*://*.company/*",    "ftp://*.company/*",
-    // Emercoin
-    "*://*.lib/*",    "ftp://*.lib/*",
-    "*://*.emc/*",    "ftp://*.emc/*",
-    "*://*.bazar/*",  "ftp://*.bazar/*",
-    "*://*.coin/*",   "ftp://*.coin/*",
-    // OpenNIC - https://wiki.opennic.org/opennic/dot
-    "*://*.bbs/*",    "ftp://*.bbs/*",
-    "*://*.chan/*",   "ftp://*.chan/*",
-    "*://*.cyb/*",    "ftp://*.cyb/*",
-    "*://*.dyn/*",    "ftp://*.dyn/*",
-    "*://*.geek/*",   "ftp://*.geek/*",
-    "*://*.gopher/*", "ftp://*.gopher/*",
-    "*://*.indy/*",   "ftp://*.indy/*",
-    "*://*.libre/*",  "ftp://*.libre/*",
-    "*://*.neo/*",    "ftp://*.neo/*",
-    "*://*.null/*",   "ftp://*.null/*",
-    "*://*.o/*",      "ftp://*.o/*",
-    "*://*.oss/*",    "ftp://*.oss/*",
-    "*://*.oz/*",     "ftp://*.oz/*",
-    "*://*.parody/*", "ftp://*.parody/*",
-    "*://*.pirate/*", "ftp://*.pirate/*",
-    "*://*.ku/*",     "ftp://*.ku/*",
-    "*://*.te/*",     "ftp://*.te/*",
-    "*://*.ti/*",     "ftp://*.ti/*",
-    "*://*.uu/*",     "ftp://*.uu/*",
-    "*://*.fur/*",    "ftp://*.fur/*",
+    'http://*/*',
+    'https://*/*'
   ]
 };
 
@@ -318,18 +548,18 @@ function parseURL(url) {
 
 // tld = 'bit'.
 function isSupportedTLD(tld) {
-  return allURLs.urls.indexOf('*://*.' + tld + '/*') != -1;
+  for (var i = 0; i < reservedTLDs.length; i++){
+	  if (reservedTLDs[i] == tld) return false;
+  }
+  return true;
 }
 
 // done = function (ips), ips = [] if nx, [ip, ...] if xx, null on error.
 function resolveViaWeb3(domain, async, done) {
 	var apiBase = apiBaseURLs[apiBaseUrlIndex];
-	
 	console.log("BDNS: resolveViaAPI("+domain+"), by " + apiBase);
-	
 	var web3 = new Web3(new Web3.providers.HttpProvider(apiBase, {timeout: 5000}));
 	var contract = new web3.eth.Contract(abiCode, contractAddress);
-	
 	contract.methods.name_query(domain).call(function(error, result)
 	/*TODO: Sync operation needed!*/
 	{

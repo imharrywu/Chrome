@@ -128,6 +128,8 @@ cache.onDomainDelete = pac.onDomainDelete;
 chrome.webRequest.onBeforeRequest.addListener(function (details) {
   console.dir(details);
   var url = parseURL(details.url);
+  var supported = isSupportedTLD(url.tld);
+  if (!supported) return {cancel:false};
   if (url) {
     var ips = cache.ips(url.domain);
     if (ips) {
@@ -187,37 +189,6 @@ chrome.alarms.create({periodInMinutes: 1});
 chrome.alarms.onAlarm.addListener(function () {
   var count = cache.prune();
   console.log('BDNS: deleted ' + count + ' expired entries; cache size = ' + cache.length); //-
-});
-
-var tabSupport = {};
-var activeTab;
-
-chrome.tabs.onActivated.addListener(function (info) {
-  activeTab = info.tabId;
-  console.info('BDNS: tab #' + activeTab + ' now active'); //-
-
-  var supported = tabSupport[activeTab];
-  chrome.browserAction[!supported ? 'enable' : 'disable']();
-});
-
-chrome.tabs.onUpdated.addListener(function (id, changeInfo) {
-  var url = parseURL(changeInfo.url || '');
-
-  if (url) {
-    var supported = isSupportedTLD(url.tld);
-
-    console.info('BDNS: tab #' + id + ' updated to ' + (supported ? '' : 'un') + 'supported TLD, domain: ' + url.domain); //-
-
-    if (supported) {
-      tabSupport[id] = supported;
-    }
-
-    if (activeTab == id) {
-      // Passing tabId doesn't seem to stick in Chrome like it does in Firefox;
-      // button's state is not restored when switching tabs.
-      chrome.browserAction[!supported ? 'enable' : 'disable']();
-    }
-  }
 });
 
 chrome.browserAction.onClicked.addListener(function () {
